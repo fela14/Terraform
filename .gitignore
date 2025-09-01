@@ -1,0 +1,31 @@
+# Local .terraform directories
+.terraform/
+
+# Terraform state files
+*.tfstate
+*.tfstate.backup
+
+# Crash logs
+crash.log
+
+# Ignore any local variable files (if sensitive)
+*.tfvars
+*.tfvars.json
+
+# Ignore override files as they are usually local only
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Include Terraform lock file (recommended to commit)
+# If you really want to ignore it, uncomment below
+# .terraform.lock.hcl
+
+# CLI configuration files
+.terraformrc
+terraform.rc
+
+# OS-specific files
+.DS_Store
+Thumbs.db
