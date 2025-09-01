@@ -15,6 +15,7 @@ provider "azurerm" {
   subscription_id = "a5223039-b4c4-4d3f-bff3-85d05005df44"
 }
 
+# Resource Group
 resource "azurerm_resource_group" "ntc_rg" {
   name     = "ntc_rg"
   location = "West Europe"
@@ -24,6 +25,7 @@ resource "azurerm_resource_group" "ntc_rg" {
   }
 }
 
+# Virtual Network
 resource "azurerm_virtual_network" "ntc_vn" {
   name                = "ntc_network"
   resource_group_name = azurerm_resource_group.ntc_rg.name
@@ -35,6 +37,7 @@ resource "azurerm_virtual_network" "ntc_vn" {
   }
 }
 
+# Subnet
 resource "azurerm_subnet" "ntc_subnet" {
   name                 = "ntc_subnet"
   resource_group_name  = azurerm_resource_group.ntc_rg.name
@@ -42,6 +45,7 @@ resource "azurerm_subnet" "ntc_subnet" {
   address_prefixes     = ["10.123.1.0/24"]
 }
 
+# Network Security Group
 resource "azurerm_network_security_group" "ntc_sg" {
   name                = "ntc_sg"
   location            = azurerm_resource_group.ntc_rg.location
@@ -51,6 +55,7 @@ resource "azurerm_network_security_group" "ntc_sg" {
     environment = "dev"
   }
 
+  # SSH rule
   security_rule {
     name                       = "Allow_SSH"
     priority                   = 100
@@ -63,6 +68,7 @@ resource "azurerm_network_security_group" "ntc_sg" {
     destination_address_prefix = "*"
   }
 
+  # HTTP rule
   security_rule {
     name                       = "Allow_HTTP"
     priority                   = 110
@@ -76,11 +82,13 @@ resource "azurerm_network_security_group" "ntc_sg" {
   }
 }
 
+# Associate NSG with Subnet
 resource "azurerm_subnet_network_security_group_association" "ntc_sga" {
   subnet_id                 = azurerm_subnet.ntc_subnet.id
   network_security_group_id = azurerm_network_security_group.ntc_sg.id
 }
 
+# Public IP
 resource "azurerm_public_ip" "ntc_ip" {
   name                = "ntc_ip"
   resource_group_name = azurerm_resource_group.ntc_rg.name
@@ -92,6 +100,7 @@ resource "azurerm_public_ip" "ntc_ip" {
   }
 }
 
+# Network Interface
 resource "azurerm_network_interface" "ntc_nic" {
   name                = "ntc_nic"
   location            = azurerm_resource_group.ntc_rg.location
@@ -109,6 +118,7 @@ resource "azurerm_network_interface" "ntc_nic" {
   }
 }
 
+# Linux VM
 resource "azurerm_linux_virtual_machine" "ntc_vm" {
   name                = "ntc_vm"
   resource_group_name = azurerm_resource_group.ntc_rg.name
@@ -136,6 +146,9 @@ resource "azurerm_linux_virtual_machine" "ntc_vm" {
     sku       = "20_04-lts"
     version   = "latest"
   }
+
+  # Custom script to install Docker
+  custom_data = filebase64("customdata.tpl")
 
   tags = {
     environment = "dev"
