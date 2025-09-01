@@ -147,10 +147,30 @@ resource "azurerm_linux_virtual_machine" "ntc_vm" {
     version   = "latest"
   }
 
-  # Custom script to install Docker
   custom_data = filebase64("customdata.tpl")
+
+  provisioner "local-exec" {
+    command = templatefile("${var.host_os}-ssh-script.tpl", {
+      hostname     = "ntc_vm"
+      public_ip    = azurerm_public_ip.ntc_ip.ip_address
+      user         = "azureuser"
+      identityFile = "~/.ssh/id_rsa"
+    })
+    interpreter = var.host_os == "windows" ? ["PowerShell", "-Command"] : ["/bin/bash", "-c"]
+  }
 
   tags = {
     environment = "dev"
   }
+}
+
+# Data source to fetch Public IP
+data "azurerm_public_ip" "ntc_ip_data" {
+  name                = azurerm_public_ip.ntc_ip.name
+  resource_group_name = azurerm_resource_group.ntc_rg.name
+}
+
+# Output
+output "public_ip_address" {
+  value = "VM Name: ${azurerm_linux_virtual_machine.ntc_vm.name}, Public IP: ${data.azurerm_public_ip.ntc_ip_data.ip_address}"
 }
