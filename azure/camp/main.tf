@@ -108,3 +108,36 @@ resource "azurerm_network_interface" "ntc_nic" {
     environment = "dev"
   }
 }
+
+resource "azurerm_linux_virtual_machine" "ntc_vm" {
+  name                = "ntc_vm"
+  resource_group_name = azurerm_resource_group.ntc_rg.name
+  location            = azurerm_resource_group.ntc_rg.location
+  size                = "Standard_B1s"
+  admin_username      = "azureuser"
+
+  network_interface_ids = [
+    azurerm_network_interface.ntc_nic.id
+  ]
+
+  admin_ssh_key {
+    username   = "azureuser"
+    public_key = file("~/.ssh/id_rsa.pub")
+  }
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "UbuntuServer"
+    sku       = "20_04-lts"
+    version   = "latest"
+  }
+
+  tags = {
+    environment = "dev"
+  }
+}
