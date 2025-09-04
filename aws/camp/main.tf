@@ -72,4 +72,18 @@ resource "aws_key_pair" "ntc_auth" {
   public_key = file("~/.ssh/ntc-key.pub")
 }
 
+resource "aws_instance" "dev_node" {
+  instance_type = "t2.micro"
+  ami = data.aws_ami.ourserver_ami.id
+  key_name = aws_key_pair.ntc_auth.key_name
+  vpc_security_group_ids      = [aws_security_group.ntc_sg.id]  
+  subnet_id = aws_subnet.ntc_public_subnet.id
+  
+  root_block_device {
+    volume_size = 10
+  }
 
+  tags = {
+    Name = "dev"
+  }
+}
