@@ -1,0 +1,30 @@
+# Terraform state files
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Terraform crash logs
+crash.log
+
+# Sensitive variable files
+*.tfvars
+credentials
+
+# Local override files
+*.tfvars.json
+*.override.tf
+*.override.tf.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE/editor folders
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Optional: log/temp files
+*.log
+*.tmp
