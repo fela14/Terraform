@@ -73,17 +73,32 @@ resource "aws_key_pair" "ntc_auth" {
 }
 
 resource "aws_instance" "dev_node" {
-  instance_type = "t2.micro"
-  ami = data.aws_ami.ourserver_ami.id
-  key_name = aws_key_pair.ntc_auth.key_name
-  vpc_security_group_ids      = [aws_security_group.ntc_sg.id]  
-  subnet_id = aws_subnet.ntc_public_subnet.id
-  
+  instance_type          = "t2.micro"
+  ami                    = data.aws_ami.ourserver_ami.id
+  key_name               = aws_key_pair.ntc_auth.key_name
+  vpc_security_group_ids = [aws_security_group.ntc_sg.id]  
+  subnet_id              = aws_subnet.ntc_public_subnet.id
+
+  # bootstrap instance (install Docker, etc.)
+  user_data = file(pathexpand("~/Terraform/aws/camp/userdata.tpl"))
+
   root_block_device {
     volume_size = 10
   }
 
   tags = {
     Name = "dev"
+  }
+
+  # Add local-exec provisioner to write SSH config
+  provisioner "local-exec" {
+    command = templatefile(pathexpand("~/Terraform/aws/camp/${var.host_os}_ssh_config.tpl"), {
+      hostname     = "dev-node"
+      public_ip    = self.public_ip
+      user         = "ubuntu"
+      identityFile = pathexpand("~/.ssh/ntc-key")
+    })
+
+    interpreter = var.host_os == "windows" ? ["PowerShell", "-Command"] : ["bash", "-c"]
   }
 }
