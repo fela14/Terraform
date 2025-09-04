@@ -26,3 +26,11 @@ resource "aws_internet_gateway" "ntc_internet_gateway" {
     Name = "dev"
   }
 }
+
+resource "aws_route_table" "vpc_public_rt" {
+    vpc_id = aws_vpc.ntc_vpc.id
+  
+  tags = {
+    Name = "dev"
+  }
+}
